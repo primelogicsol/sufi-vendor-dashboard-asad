@@ -325,6 +325,7 @@
 
 
 "use client";
+import { useCallback } from "react";
 import Image from "next/image";
 import { ProductDetailsModal } from "@/components/product-details-modal";
 import { useState, useEffect, useMemo } from "react";
@@ -496,31 +497,32 @@ export default function DashboardPage() {
   const PRODUCTS_PER_PAGE = 10;
 
   // Fetch products
-  const fetchProducts = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const endpoint = CATEGORY_ENDPOINTS[selectedCategory];
-      if (!endpoint) return;
-      const items = await ProductService.getProductsByCategory(
-        endpoint,
-        1,
-        100,
-        searchQuery
-      );
-      setProducts(items);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchProducts = useCallback(async () => {
+  setLoading(true);
+  setError(null);
+  try {
+    const endpoint = CATEGORY_ENDPOINTS[selectedCategory];
+    if (!endpoint) return;
+    const items = await ProductService.getProductsByCategory(
+      endpoint,
+      1,
+      100,
+      searchQuery
+    );
+    setProducts(items);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Unknown error");
+    setProducts([]);
+  } finally {
+    setLoading(false);
+  }
+}, [selectedCategory, searchQuery]); // ✅ stable dependencies
+
 
   // Effects
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory, fetchProducts]); // Added fetchProducts to dependencies
+  }, [ fetchProducts]); // Added fetchProducts to dependencies
 
   useEffect(() => {
     setCurrentPage(1);
