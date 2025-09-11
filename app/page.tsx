@@ -350,9 +350,10 @@ import { ApiClient } from "@/lib/utils/api-client";
 // Category → endpoint mapping
 const CATEGORY_ENDPOINTS: Record<string, string> = {
   Decoration: "/decoration",
-  Fashion: "/decoration", // using /decoration for now
-  Meditation: "/decoration", // using /decoration for now
+  Fashion: "/fashion", // using /decoration for now
+  Meditation: "/meditation", // using /decoration for now
   Accessories: "/accessories",
+  HomeLiving: "/living"
 };
 
 const categories = Object.keys(CATEGORY_ENDPOINTS);

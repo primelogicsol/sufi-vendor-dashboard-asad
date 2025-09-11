@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import { AuthService } from "@/lib/auth/auth-service"
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -123,8 +123,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm" className="hidden sm:flex bg-transparent">
-              View Store
+            <Button variant="outline" size="sm" className="hidden sm:flex bg-transparent" onClick={() => AuthService.logout()}>
+              Logout
             </Button>
           </div>
         </header>

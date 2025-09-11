@@ -13,7 +13,7 @@ import { Loader2, X } from "lucide-react"
 import { ApiClient } from "@/lib/utils/api-client"
 
 // Physical categories only for now
-const physicalCategories = ["Accessories", "Decoration", "Fashion", "Meditation"]
+const physicalCategories = ["Accessories", "Decoration", "Fashion", "Meditation" , "HomeLiving"] as const
 
 // Validation function
 function validateProduct(data: typeof initialPhysicalProductData) {
@@ -101,7 +101,20 @@ export default function SingleProductUploader() {
       alert("Fix errors:\n" + errors.join("\n"))
       return
     }
-
+// "data": {
+//         "id": 5,
+//         "stock": 3,
+//         "title": "abc decoration 2",
+//         "description": "abc is mybnm",
+//         "price": 45,
+//         "tags": [],
+//         "sku": "96969",
+//         "images": [],
+//         "createdAt": "2025-09-11T07:35:21.950Z",
+//         "updatedAt": "2025-09-11T07:35:21.950Z",
+//         "isDelete": false,
+//         "userId": "cmfbfaui90000uoqcymzeicfd"
+//     }
     const payload = {
       title: physicalProductData.title.trim(),
       description: physicalProductData.description.trim(),
@@ -109,17 +122,16 @@ export default function SingleProductUploader() {
       stock: physicalProductData.stock,
       sku: physicalProductData.sku.trim(),
       tags: physicalProductData.tags.length > 0 ? physicalProductData.tags : undefined,
-      discount: physicalProductData.discount || undefined,
-      deliveryTime: physicalProductData.deliveryTime || undefined,
-      note: physicalProductData.note || undefined,
-      isAvailable: physicalProductData.isAvailable,
-      returnPolicy: physicalProductData.returnPolicy || undefined,
+      // images:  []
     }
 
     let endpoint = ""
     switch (selectedCategory) {
       case "Decoration":
         endpoint = "/decoration"
+        break
+      case "HomeLiving":
+        endpoint = "/living"
         break
       case "Accessories":
         endpoint = "/accessories"
@@ -140,6 +152,7 @@ export default function SingleProductUploader() {
 
     try {
       setIsSubmitting(true)
+      console.log("Submitting to", endpoint, "with data:", payload)
       const response = await ApiClient.postJson(endpoint, payload, true)
       console.log("✅ Created:", response)
       alert("Product uploaded successfully!")

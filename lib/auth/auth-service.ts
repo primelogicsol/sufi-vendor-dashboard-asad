@@ -129,7 +129,8 @@ export class AuthService {
     try {
       // Clear tokens from storage
       TokenManager.clearTokens()
-
+      // Hard refresh: reload the page to clear any client-side state
+      window.location.href = '/login'
       // Optional: Call logout endpoint if you have one
       // const refreshToken = TokenManager.getRefreshToken()
       // if (refreshToken) {
