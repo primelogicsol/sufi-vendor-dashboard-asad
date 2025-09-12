@@ -556,18 +556,18 @@ export function LoginForm() {
                 )}
               </Button>
 
-              {/* Divider */}
-              <div className="relative">
+              {/* Divider   OR   */}
+              {/* <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-muted" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-card px-2 text-muted-foreground">Or</span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Social Login Options */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* <div className="grid grid-cols-2 gap-3">
                 <Button
                   type="button"
                   variant="outline"
@@ -614,13 +614,13 @@ export function LoginForm() {
                   </svg>
                   Microsoft
                 </Button>
-              </div>
+              </div> */}
             </CardFooter>
           </form>
         </Card>
 
         {/* Sign Up Link */}
-        <div className="text-center">
+        {/* <div className="text-center">
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link
@@ -630,10 +630,10 @@ export function LoginForm() {
               Sign up here
             </Link>
           </p>
-        </div>
+        </div> */}
 
         {/* Help/Support */}
-        <div className="text-center">
+        {/* <div className="text-center">
           <p className="text-xs text-muted-foreground">
             Having trouble signing in?{' '}
             <Link
@@ -643,7 +643,7 @@ export function LoginForm() {
               Contact support
             </Link>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   )

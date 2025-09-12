@@ -1,6 +1,6 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
 import  SingleProductUpload  from "@/components/single-product-upload"
-import { CSVBulkUpload } from "@/components/csv-bulk-upload"
+import  BulkProductUploader  from "@/components/csv-bulk-upload"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Upload, FileSpreadsheet } from "lucide-react"
@@ -55,7 +55,7 @@ export default function UploadPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <CSVBulkUpload />
+                <BulkProductUploader />
               </CardContent>
             </Card>
           </TabsContent>

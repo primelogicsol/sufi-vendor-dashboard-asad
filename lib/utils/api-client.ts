@@ -1,3 +1,5 @@
+
+
 // // lib/utils/api-client.ts
 
 // import { TokenManager } from '@/lib/auth/token-manager'
@@ -9,7 +11,7 @@
 // interface ApiRequestOptions {
 //   method?: string
 //   headers?: Record<string, string>
-//   body?: any
+//   body?: unknown
 //   requiresAuth?: boolean
 // }
 
@@ -109,15 +111,15 @@
 //     return this.request(endpoint, { method: 'GET', requiresAuth })
 //   }
 
-//   static async post(endpoint: string, data: any, requiresAuth: boolean = true): Promise<Response> {
+//   static async post(endpoint: string, data: unknown, requiresAuth: boolean = true): Promise<Response> {
 //     return this.request(endpoint, { method: 'POST', body: data, requiresAuth })
 //   }
 
-//   static async put(endpoint: string, data: any, requiresAuth: boolean = true): Promise<Response> {
+//   static async put(endpoint: string, data: unknown, requiresAuth: boolean = true): Promise<Response> {
 //     return this.request(endpoint, { method: 'PUT', body: data, requiresAuth })
 //   }
 
-//   static async patch(endpoint: string, data: any, requiresAuth: boolean = true): Promise<Response> {
+//   static async patch(endpoint: string, data: unknown, requiresAuth: boolean = true): Promise<Response> {
 //     return this.request(endpoint, { method: 'PATCH', body: data, requiresAuth })
 //   }
 
@@ -131,7 +133,7 @@
 //     return response.json()
 //   }
 
-//   static async postJson<T>(endpoint: string, data: any, requiresAuth: boolean = true): Promise<T> {
+//   static async postJson<T>(endpoint: string, data: unknown, requiresAuth: boolean = true): Promise<T> {
 //     const response = await this.post(endpoint, data, requiresAuth)
 //     return response.json()
 //   }
@@ -166,8 +168,12 @@ export class ApiClient {
 
     // Prepare headers
     const requestHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...headers,
+    }
+
+    // Only set Content-Type for JSON, let browser set it for FormData
+    if (!(body instanceof FormData)) {
+      requestHeaders['Content-Type'] = 'application/json'
     }
 
     // Add authentication if required
@@ -207,7 +213,11 @@ export class ApiClient {
 
     // Add body for POST/PUT requests
     if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-      requestOptions.body = JSON.stringify(body)
+      if (body instanceof FormData) {
+        requestOptions.body = body // FormData goes directly
+      } else {
+        requestOptions.body = JSON.stringify(body) // JSON needs stringifying
+      }
     }
 
     try {
@@ -273,6 +283,17 @@ export class ApiClient {
 
   static async postJson<T>(endpoint: string, data: unknown, requiresAuth: boolean = true): Promise<T> {
     const response = await this.post(endpoint, data, requiresAuth)
+    return response.json()
+  }
+
+  // FormData specific helper
+  static async postFormData<T>(endpoint: string, formData: FormData, requiresAuth: boolean = true): Promise<T> {
+    const response = await this.post(endpoint, formData, requiresAuth)
+    return response.json()
+  }
+
+  static async putFormData<T>(endpoint: string, formData: FormData, requiresAuth: boolean = true): Promise<T> {
+    const response = await this.put(endpoint, formData, requiresAuth)
     return response.json()
   }
 }

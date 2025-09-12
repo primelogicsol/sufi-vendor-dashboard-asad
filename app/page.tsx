@@ -1,4 +1,5 @@
 // "use client";
+// import { useCallback } from "react";
 // import Image from "next/image";
 // import { ProductDetailsModal } from "@/components/product-details-modal";
 // import { useState, useEffect, useMemo } from "react";
@@ -23,9 +24,10 @@
 // // Category → endpoint mapping
 // const CATEGORY_ENDPOINTS: Record<string, string> = {
 //   Decoration: "/decoration",
-//   Fashion: "/decoration", // using /decoration for now
-//   Meditation: "/decoration", // using /decoration for now
+//   Fashion: "/fashion", // using /decoration for now
+//   Meditation: "/meditation", // using /decoration for now
 //   Accessories: "/accessories",
+//   HomeLiving: "/living"
 // };
 
 // const categories = Object.keys(CATEGORY_ENDPOINTS);
@@ -51,7 +53,7 @@
 //   success: boolean;
 //   status: number;
 //   message: string;
-//   data: { [key: string]: Product[] | any }; // category array OR pagination
+//   data: { [key: string]: Product[] }; // Removed any, assuming category array only
 // }
 
 // // ProductService
@@ -88,29 +90,42 @@
 //   }
 // }
 
+// const getValidImageUrl = (images: string[] | undefined): string | null => {
+//   if (!images || !Array.isArray(images)) return null;
+  
+//   for (const img of images) {
+//     if (typeof img === 'string' && img.startsWith('http')) {
+//       try {
+//         new URL(img);
+//         return img;
+//       } catch {
+//         continue;
+//       }
+//     }
+//   }
+//   return null;
+// };
+
 // // ProductCard
 // function ProductCard({
 //   product,
-  
 // }: {
 //   product: Product;
 //   onViewDetails: (p: Product) => void;
 // }) {
-//   // const averageRating = product.reviews?.length
-//   //   ? product.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-//   //     product.reviews.length
-//   //   : 0;
-
-//   const displayImage = product.images?.[0] || null;
+//   // const displayImage = product.images?.[0] || null;
+//   const displayImage = getValidImageUrl(product.images);
 
 //   return (
 //     <Card className="group overflow-hidden border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
-//       <div className="aspect-[4/3] overflow-hidden bg-muted/20">
+//       <div className="aspect-[4/3] overflow-hidden bg-muted/20 relative">
 //         {displayImage ? (
 //           <Image
 //             src={displayImage}
 //             alt={product.title}
-//             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+//             fill
+//             // className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+//             className="object-cover group-hover:scale-105 transition-transform duration-300"
 //             onError={(e) => {
 //               const target = e.target as HTMLImageElement;
 //               target.style.display = "none";
@@ -132,24 +147,6 @@
 //           </p>
 //         </div>
 
-//         {/* Rating */}
-        
-//           {/* {Array.from({ length: 5 }).map((_, i) => (
-//             <Star
-//               key={i}
-//               className={`h-4 w-4 ${
-//                 i < Math.floor(averageRating)
-//                   ? "fill-yellow-400 text-yellow-400"
-//                   : "text-muted-foreground/30"
-//               }`}
-//             />
-//           ))} */}
-//           {/* <span className="text-sm text-muted-foreground ml-1">
-//             ({product.reviews?.length || 0})
-//           </span> */}
-        
-
-//         {/* Price + Stock */}
 //         <div className="flex items-center justify-between">
 //           <div className="flex items-center space-x-2">
 //             <span className="text-lg font-bold">
@@ -164,23 +161,17 @@
 //           </div>
 //         </div>
 //         <ProductDetailsModal
-//                     productId={product.id}
-//                     trigger={
-//                       <Button
-//                         className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground"
-//                         size="sm"
-//                       >
-//                         View Details
-//                       </Button>
-//                     }
-//                   />
-//         {/* <Button
-//           className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground"
-//           size="sm"
-//           onClick={() => onViewDetails(product)}
-//         >
-//           View Details
-//         </Button> */}
+//           productId={product.id}
+//           category={selectedCategory}
+//           trigger={
+//             <Button
+//               className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+//               size="sm"
+//             >
+//               View Details
+//             </Button>
+//           }
+//         />
 //       </CardContent>
 //     </Card>
 //   );
@@ -196,36 +187,37 @@
 //   const [currentPage, setCurrentPage] = useState(1);
 //   const [selectedProductId, setSelectedProductId] = useState<number | null>(
 //     null
-//   ); // 👈 new state
+//   );
 
 //   const PRODUCTS_PER_PAGE = 10;
 
 //   // Fetch products
-//   const fetchProducts = async () => {
-//     setLoading(true);
-//     setError(null);
-//     try {
-//       const endpoint = CATEGORY_ENDPOINTS[selectedCategory];
-//       if (!endpoint) return;
-//       const items = await ProductService.getProductsByCategory(
-//         endpoint,
-//         1,
-//         100,
-//         searchQuery
-//       );
-//       setProducts(items);
-//     } catch (err) {
-//       setError(err instanceof Error ? err.message : "Unknown error");
-//       setProducts([]);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+//   const fetchProducts = useCallback(async () => {
+//   setLoading(true);
+//   setError(null);
+//   try {
+//     const endpoint = CATEGORY_ENDPOINTS[selectedCategory];
+//     if (!endpoint) return;
+//     const items = await ProductService.getProductsByCategory(
+//       endpoint,
+//       1,
+//       100,
+//       searchQuery
+//     );
+//     setProducts(items);
+//   } catch (err) {
+//     setError(err instanceof Error ? err.message : "Unknown error");
+//     setProducts([]);
+//   } finally {
+//     setLoading(false);
+//   }
+// }, [selectedCategory, searchQuery]); // ✅ stable dependencies
+
 
 //   // Effects
 //   useEffect(() => {
 //     fetchProducts();
-//   }, [selectedCategory]);
+//   }, [ fetchProducts]); // Added fetchProducts to dependencies
 
 //   useEffect(() => {
 //     setCurrentPage(1);
@@ -245,7 +237,6 @@
 //   }, [products, searchQuery]);
 
 //   // Pagination
-//   // const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
 //   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
 //   const paginatedProducts = filteredProducts.slice(
 //     startIndex,
@@ -301,7 +292,7 @@
 //               <ProductCard
 //                 key={product.id}
 //                 product={product}
-//                 onViewDetails={(p) => setSelectedProductId(p.id)} // 👈 pass id
+//                 onViewDetails={(p) => setSelectedProductId(p.id)}
 //               />
 //             ))}
 //           </div>
@@ -316,12 +307,14 @@
 //       {selectedProductId && (
 //         <ProductDetailsModal
 //           productId={selectedProductId}
+//           category={selectedCategory}
 //           trigger={null} // no trigger, open by state
 //         />
 //       )}
 //     </DashboardLayout>
 //   );
 // }
+
 
 
 "use client";
@@ -350,8 +343,8 @@ import { ApiClient } from "@/lib/utils/api-client";
 // Category → endpoint mapping
 const CATEGORY_ENDPOINTS: Record<string, string> = {
   Decoration: "/decoration",
-  Fashion: "/fashion", // using /decoration for now
-  Meditation: "/meditation", // using /decoration for now
+  Fashion: "/fashion",
+  Meditation: "/meditation",
   Accessories: "/accessories",
   HomeLiving: "/living"
 };
@@ -379,7 +372,7 @@ interface ApiResponse {
   success: boolean;
   status: number;
   message: string;
-  data: { [key: string]: Product[] }; // Removed any, assuming category array only
+  data: { [key: string]: Product[] };
 }
 
 // ProductService
@@ -401,7 +394,6 @@ class ProductService {
 
       if (!json.success) throw new Error(json.message || "API error");
 
-      // extract products array (e.g., data.accessories, data.decoration, etc.)
       const categoryKey = Object.keys(json.data).find((k) =>
         Array.isArray(json.data[k])
       );
@@ -416,23 +408,43 @@ class ProductService {
   }
 }
 
+const getValidImageUrl = (images: string[] | undefined): string | null => {
+  if (!images || !Array.isArray(images)) return null;
+  
+  for (const img of images) {
+    if (typeof img === 'string' && img.startsWith('http')) {
+      try {
+        new URL(img);
+        return img;
+      } catch {
+        continue;
+      }
+    }
+  }
+  return null;
+};
+
 // ProductCard
 function ProductCard({
   product,
+  category,  // ✅ Added: Accept category prop
+  onProductDeleted,  // ✅ Added: For refetching after delete
 }: {
   product: Product;
-  onViewDetails: (p: Product) => void;
+  category: string;  // ✅ Type for category
+  onProductDeleted?: () => void;  // ✅ Optional callback
 }) {
-  const displayImage = product.images?.[0] || null;
+  const displayImage = getValidImageUrl(product.images);
 
   return (
     <Card className="group overflow-hidden border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
-      <div className="aspect-[4/3] overflow-hidden bg-muted/20">
+      <div className="aspect-[4/3] overflow-hidden bg-muted/20 relative">
         {displayImage ? (
           <Image
             src={displayImage}
             alt={product.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = "none";
@@ -469,6 +481,7 @@ function ProductCard({
         </div>
         <ProductDetailsModal
           productId={product.id}
+          category={category}  // ✅ Pass category to modal
           trigger={
             <Button
               className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground"
@@ -477,6 +490,7 @@ function ProductCard({
               View Details
             </Button>
           }
+          onProductDeleted={onProductDeleted}  // ✅ Pass refetch callback
         />
       </CardContent>
     </Card>
@@ -491,39 +505,36 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(
-    null
-  );
+  // const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
 
   const PRODUCTS_PER_PAGE = 10;
 
   // Fetch products
   const fetchProducts = useCallback(async () => {
-  setLoading(true);
-  setError(null);
-  try {
-    const endpoint = CATEGORY_ENDPOINTS[selectedCategory];
-    if (!endpoint) return;
-    const items = await ProductService.getProductsByCategory(
-      endpoint,
-      1,
-      100,
-      searchQuery
-    );
-    setProducts(items);
-  } catch (err) {
-    setError(err instanceof Error ? err.message : "Unknown error");
-    setProducts([]);
-  } finally {
-    setLoading(false);
-  }
-}, [selectedCategory, searchQuery]); // ✅ stable dependencies
-
+    setLoading(true);
+    setError(null);
+    try {
+      const endpoint = CATEGORY_ENDPOINTS[selectedCategory];
+      if (!endpoint) return;
+      const items = await ProductService.getProductsByCategory(
+        endpoint,
+        1,
+        100,
+        searchQuery
+      );
+      setProducts(items);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCategory, searchQuery]);
 
   // Effects
   useEffect(() => {
     fetchProducts();
-  }, [ fetchProducts]); // Added fetchProducts to dependencies
+  }, [fetchProducts]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -598,7 +609,8 @@ export default function DashboardPage() {
               <ProductCard
                 key={product.id}
                 product={product}
-                onViewDetails={(p) => setSelectedProductId(p.id)}
+                category={selectedCategory}  // ✅ Pass category to ProductCard
+                onProductDeleted={fetchProducts}  // ✅ Pass refetch callback
               />
             ))}
           </div>
@@ -610,12 +622,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Modal */}
-      {selectedProductId && (
+      {/* {selectedProductId && (
         <ProductDetailsModal
           productId={selectedProductId}
-          trigger={null} // no trigger, open by state
+          category={selectedCategory}  // ✅ Pass category to central modal
+          trigger={null}
+          onProductDeleted={fetchProducts}  // ✅ Pass refetch callback
         />
-      )}
+      )} */}
     </DashboardLayout>
   );
 }
