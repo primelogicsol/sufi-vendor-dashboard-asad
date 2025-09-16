@@ -7,7 +7,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+
 import { LayoutDashboard, Upload, Menu, X, Store, BarChart3 } from "lucide-react"
 
 const navigation = [
@@ -91,7 +91,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </nav>
 
           {/* Vendor info card */}
-          <div className="p-4">
+          {/* <div className="p-4">
             <Card className="p-4 bg-gradient-to-br from-card to-muted/20">
               <div className="flex items-center space-x-3">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
@@ -103,7 +103,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
               </div>
             </Card>
-          </div>
+          </div> */}
         </div>
       </div>
 

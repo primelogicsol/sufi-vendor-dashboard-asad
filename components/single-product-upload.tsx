@@ -571,7 +571,7 @@ export default function SingleProductUploader() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Select Category</CardTitle>
+          <CardTitle className="text-lg text-bold text-[#511d5e]">Select Category</CardTitle>
         </CardHeader>
         <CardContent>
           <Select onValueChange={(value) => setSelectedCategory(value)}>
@@ -593,12 +593,15 @@ export default function SingleProductUploader() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle className="text-lg  text-bold text-[#511d5e]">Basic Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Product Title</Label>
+            <CardContent className="space-y-4 ">
+              <div className="flex flex-col gap-2">
+                <Label>
+                  <strong>Product Title</strong>
+                </Label>
                 <Input
+                  className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
                   value={physicalProductData.title}
                   onChange={(e) =>
                     handlePhysicalProductChange("title", e.target.value)
@@ -606,9 +609,12 @@ export default function SingleProductUploader() {
                   required
                 />
               </div>
-              <div>
-                <Label>SKU</Label>
+              <div className="flex flex-col gap-2">
+                <Label>
+                  <strong>SKU</strong>
+                </Label>
                 <Input
+                  className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
                   value={physicalProductData.sku}
                   onChange={(e) =>
                     handlePhysicalProductChange("sku", e.target.value)
@@ -616,9 +622,12 @@ export default function SingleProductUploader() {
                   required
                 />
               </div>
-              <div>
-                <Label>Description</Label>
+              <div className="flex flex-col gap-2">
+                <Label>
+                  <strong>Description</strong>
+                </Label>
                 <Textarea
+                  className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
                   value={physicalProductData.description}
                   onChange={(e) =>
                     handlePhysicalProductChange("description", e.target.value)
@@ -631,12 +640,15 @@ export default function SingleProductUploader() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Pricing & Inventory</CardTitle>
+              <CardTitle className="text-lg text-bold text-[#511d5e]">Pricing & Inventory</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label>Price</Label>
+              <div className="flex flex-col gap-2">
+                <Label>
+                  <strong>Price</strong>
+                </Label>
                 <Input
+                  className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
                   type="number"
                   value={physicalProductData.price}
                   onChange={(e) =>
@@ -645,9 +657,12 @@ export default function SingleProductUploader() {
                   required
                 />
               </div>
-              <div>
-                <Label>Stock</Label>
+              <div className="flex flex-col gap-2">
+                <Label>
+                  <strong>Stock</strong>
+                </Label>
                 <Input
+                  className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
                   type="number"
                   value={physicalProductData.stock}
                   onChange={(e) =>
@@ -662,11 +677,13 @@ export default function SingleProductUploader() {
           {/* Image Upload Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Product Images</CardTitle>
+              <CardTitle className="text-lg text-bold text-[#511d5e]">Product Images</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label>Upload Images</Label>
+              <div className="flex flex-col gap-2">
+                <Label>
+                  <strong>Upload Images</strong>
+                </Label>
                 <div className="mt-2">
                   <Input
                     type="file"
@@ -726,7 +743,7 @@ export default function SingleProductUploader() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Tags</CardTitle>
+              <CardTitle className="text-lg text-bold text-[#511d5e]">Tags</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2 mb-2">
@@ -734,7 +751,7 @@ export default function SingleProductUploader() {
                   <Badge
                     key={tag}
                     variant="secondary"
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 "
                   >
                     {tag}
                     <button type="button" onClick={() => removeTag(tag)}>
@@ -745,6 +762,7 @@ export default function SingleProductUploader() {
               </div>
               <div className="flex gap-2">
                 <Input
+                  className="bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder="Add tag"
@@ -752,7 +770,7 @@ export default function SingleProductUploader() {
                     e.key === "Enter" && (e.preventDefault(), addTag())
                   }
                 />
-                <Button type="button" onClick={addTag}>
+                <Button type="button" onClick={addTag} className="bg-gradient-to-r from-[#8a5d95] to-[#644c6a] hover:from-[#684670] hover:to-[#644c6a] text-white shadow-lg hover:shadow-xl transition-all duration-300">
                   Add
                 </Button>
               </div>
@@ -760,7 +778,7 @@ export default function SingleProductUploader() {
           </Card>
 
           <div className="flex justify-end gap-4">
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="bg-gradient-to-r from-[#8a5d95] to-[#644c6a] hover:from-[#684670] hover:to-[#644c6a] text-white shadow-lg hover:shadow-xl transition-all duration-300">
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
