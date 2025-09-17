@@ -47,17 +47,29 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 transform bg-sidebar border-r border-sidebar-border transition-transform duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-50 transform bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out",
+          "w-64 lg:w-64",
+          sidebarCollapsed && "lg:w-20",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
-          sidebarCollapsed ? "lg:-translate-x-full" : "lg:translate-x-0",
+          "lg:translate-x-0",
         )}
       >
         <div className="flex h-full flex-col">
           {/* Logo/Header */}
-          <div className="flex h-16 items-center justify-between px-6 bg-gradient-to-r from-primary to-secondary">
-            <div className="flex items-center space-x-2">
+          <div className={cn(
+            "flex h-16 items-center justify-between px-6 bg-gradient-to-r from-primary to-secondary",
+            sidebarCollapsed && "lg:justify-center lg:px-4",
+          )}>
+            <div className={cn("flex items-center space-x-2", sidebarCollapsed && "lg:space-x-0") }>
               <Store className="h-8 w-8 text-primary-foreground" />
-              <span className="text-xl font-bold text-primary-foreground">VendorHub</span>
+              <span
+                className={cn(
+                  "text-xl font-bold text-primary-foreground ml-2 transition-all duration-300",
+                  sidebarCollapsed && "lg:opacity-0 lg:w-0 lg:ml-0 lg:overflow-hidden",
+                )}
+              >
+                VendorHub
+              </span>
             </div>
             <Button
               variant="ghost"
@@ -78,7 +90,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    sidebarCollapsed && "lg:justify-center",
                     isActive
                       ? "bg-gradient-to-r from-sidebar-primary to-sidebar-accent text-sidebar-primary-foreground shadow-sm"
                       : "text-sidebar-foreground hover:bg-sidebar-accent/10 hover:text-sidebar-accent",
@@ -86,7 +99,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   onClick={() => setSidebarOpen(false)}
                 >
                   <item.icon className="h-5 w-5" />
-                  <span>{item.name}</span>
+                  <span
+                    className={cn(
+                      "ml-3 whitespace-nowrap transition-all duration-300",
+                      sidebarCollapsed && "lg:opacity-0 lg:ml-0 lg:w-0 lg:overflow-hidden",
+                    )}
+                  >
+                    {item.name}
+                  </span>
                 </Link>
               )
             })}
@@ -110,7 +130,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className={cn("lg:pl-64", sidebarCollapsed && "lg:pl-0")}> 
+      <div
+        className={cn(
+          "transition-[padding] duration-300 ease-in-out",
+          "lg:pl-64",
+          sidebarCollapsed && "lg:pl-20",
+        )}
+      > 
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
           <div className="flex items-center gap-2">
@@ -143,7 +169,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-6 transition-[padding] duration-300 ease-in-out">{children}</main>
       </div>
     </div>
   )

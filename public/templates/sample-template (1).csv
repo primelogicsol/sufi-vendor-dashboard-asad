@@ -1,0 +1,4 @@
+SSC Bulk Product Upload Format (Version 25+) ,,,,,,
+,,,,,,
+,,,,,,
+Product_SKU,Product_Category,Product_Title,Product_Description,Product_Price_USD,Product_In_Stock,Product_Image_URL

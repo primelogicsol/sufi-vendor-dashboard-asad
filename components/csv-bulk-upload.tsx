@@ -467,12 +467,13 @@ export default function BulkProductUploader() {
         selectedCategory,
         formData
       );
-
+      
       if (!response.ok) throw new Error("CSV Upload failed");
       toast.success("🎉 CSV Upload successful!");
-
+      
+      // window.location.reload();
       setFile(null);
-      setSelectedCategory(null);
+      // setSelectedCategory(null);
     } catch (err) {
       console.error("❌ CSV Upload error:", err);
       toast.error("❌ CSV Upload failed: " + (err as Error).message);
