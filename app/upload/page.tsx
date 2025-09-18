@@ -98,7 +98,7 @@ export default function UploadPage() {
 
   {/* Right Side (Download Template Button) */}
   <a
-    href="/templates/sample-template.csv" // <-- place your sample.csv in /public/templates/
+    href="/templates/sample-product-template.xlsx" // <-- place your sample.csv in /public/templates/
     download
     className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#8a5d95] to-[#644c6a] rounded-lg shadow hover:opacity-90 transition-all duration-300"
   >
