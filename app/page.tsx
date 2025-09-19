@@ -659,7 +659,8 @@ const CATEGORY_ENDPOINTS: Record<string, string> = {
   Meditation: "/meditation",
   Accessories: "/accessories",
   HomeLiving: "/living",
-  DigitalBooks: "/digital-books"
+  DigitalBooks: "/digital-books",
+  Audio: "/audio"
 };
 const categories = Object.keys(CATEGORY_ENDPOINTS);
 

@@ -328,9 +328,9 @@
 //                   <strong>Name </strong>
 //                 </Label>
 //                 <Input
-//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 
-//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 
-//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 
+//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500
+//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20
+//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50
 //           focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
 //                   value={physicalProductData.name}
 //                   onChange={(e) =>
@@ -346,9 +346,9 @@
 //                   <strong>Color </strong>
 //                 </Label>
 //                 <Input
-//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 
-//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 
-//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 
+//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500
+//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20
+//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50
 //           focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
 //                   value={physicalProductData.color}
 //                   onChange={(e) =>
@@ -364,9 +364,9 @@
 //                   <strong>Care Instructions </strong>
 //                 </Label>
 //                 <Textarea
-//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 
-//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 
-//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 
+//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500
+//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20
+//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50
 //           focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
 //                   value={physicalProductData.care}
 //                   onChange={(e) =>
@@ -382,9 +382,9 @@
 //                   <strong>Material </strong>
 //                 </Label>
 //                 <Input
-//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 
-//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 
-//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 
+//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500
+//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20
+//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50
 //           focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
 //                   value={physicalProductData.material}
 //                   onChange={(e) =>
@@ -400,9 +400,9 @@
 //                   <strong>Shipping Time</strong>
 //                 </Label>
 //                 <Input
-//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500 
-//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20 
-//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50 
+//                   className="h-12 px-4 py-3 bg-white/30 border-gray-300 text-gray-900 placeholder:text-gray-500
+//           transition-all duration-300 focus:bg-gradient-to-r focus:from-[#8a5d95]/20 focus:to-[#644c6a]/20
+//           focus:border-[#8a5d95] focus:text-black focus:placeholder:text-white/50
 //           focus:ring-2 focus:ring-[#8a5d95]/50 focus:shadow-xl focus:backdrop-blur-sm hover:border-gray-400"
 //                   value={physicalProductData.shippingTime}
 //                   onChange={(e) =>
@@ -581,8 +581,6 @@
 //   );
 // }
 
-
-
 "use client";
 
 import { useState } from "react";
@@ -591,6 +589,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import AudioSpectrumUploader from "./AudioSpectrumUploader";
+
 import {
   Select,
   SelectContent,
@@ -610,7 +610,8 @@ const allCategories = [
   "Fashion",
   "Meditation",
   "HomeLiving",
-  "DigitalBooks", // New category
+  "DigitalBooks",
+  "Audio", // New category
 ] as const;
 
 // Physical categories only
@@ -836,7 +837,7 @@ export default function SingleProductUploader() {
 
   return (
     <>
-    <Card>
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg text-bold text-[#511d5e]">
             Select Category
@@ -857,12 +858,12 @@ export default function SingleProductUploader() {
           </Select>
         </CardContent>
       </Card>
-    
-      
 
       {selectedCategory === "DigitalBooks" ? (
         <DigitalBookUploader />
-      ) : selectedCategory? (
+      ) : selectedCategory === "Audio" ? (
+        <AudioSpectrumUploader />
+      ) : selectedCategory ? (
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
             <CardHeader>
@@ -1173,9 +1174,8 @@ export default function SingleProductUploader() {
               Upload Product
             </Button>
           </div>
-        
-    </form>
-    ) : null}
-</>
+        </form>
+      ) : null}
+    </>
   );
 }
