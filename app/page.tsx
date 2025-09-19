@@ -658,20 +658,39 @@ const CATEGORY_ENDPOINTS: Record<string, string> = {
   Fashion: "/fashion",
   Meditation: "/meditation",
   Accessories: "/accessories",
-  HomeLiving: "/living"
+  HomeLiving: "/living",
+  DigitalBooks: "/digital-books"
 };
 const categories = Object.keys(CATEGORY_ENDPOINTS);
 
 // Types
+// interface Product {
+//   id: number;
+//   title: string;
+//   name: string;
+//   description: string;
+//   price: number;
+//   stock: number;
+//   sku: string;
+//   images?: string[];
+//   tags?: string[];
+//   createdAt?: string;
+//   updatedAt?: string;
+//   isDelete?: boolean;
+//   userId?: string;
+//   reviews?: string[];
+// }
+
 interface Product {
   id: number;
   title: string;
   name: string;
   description: string;
   price: number;
-  stock: number;
-  sku: string;
+  stock?: number;     // stock not for digital books
+  sku?: string;
   images?: string[];
+  coverImage?: string; // ✅ new for digital books
   tags?: string[];
   createdAt?: string;
   updatedAt?: string;
@@ -679,6 +698,7 @@ interface Product {
   userId?: string;
   reviews?: string[];
 }
+
 interface Pagination {
   totalItems: number;
   currentPage: number;
@@ -751,7 +771,11 @@ function ProductCard({
   category: string;
   onProductDeleted?: () => void;
 }) {
-  const displayImage = getValidImageUrl(product.images);
+  // 
+  const displayImage =
+  category === "DigitalBooks"
+    ? getValidImageUrl([product.coverImage ?? ""]) // ✅ wrap coverImage in array
+    : getValidImageUrl(product.images);
   return (
     <Card className="group overflow-hidden border border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg">
       <div className="aspect-[4/3] overflow-hidden bg-muted/20 relative">
@@ -784,9 +808,14 @@ function ProductCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
-            <Badge variant={product.stock > 0 ? "default" : "destructive"} className="text-xs">
+            {category !== "DigitalBooks" && (
+            <Badge
+              variant={product.stock && product.stock > 0 ? "default" : "destructive"}
+              className="text-xs"
+            >
               Stock: {product.stock}
             </Badge>
+          )}
           </div>
         </div>
         <ProductDetailsModal
