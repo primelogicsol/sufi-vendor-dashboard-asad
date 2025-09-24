@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, FileSpreadsheet } from "lucide-react";
+import { Upload, FileSpreadsheet, FileText } from "lucide-react";
 
 export default function UploadPage() {
   return (
@@ -82,30 +82,40 @@ export default function UploadPage() {
                 </CardDescription>
               </CardHeader> */}
               <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-  {/* Left Side (Heading + Description) */}
-  <div>
-    <CardTitle className="flex items-center space-x-2">
-      <FileSpreadsheet className="h-5 w-5 text-secondary" />
-      <span className="text-lg text-[#511d5e] font-bold">
-        Bulk Upload (CSV)
-      </span>
-    </CardTitle>
-    <CardDescription className="text-lg text-[#644c6a]">
-      Upload multiple products at once using a CSV file. Download
-      the template to get started.
-    </CardDescription>
-  </div>
+                {/* Left Side (Heading + Description) */}
+                <div>
+                  <CardTitle className="flex items-center space-x-2">
+                    <FileSpreadsheet className="h-5 w-5 text-secondary" />
+                    <span className="text-lg text-[#511d5e] font-bold">
+                      Bulk Upload (CSV)
+                    </span>
+                  </CardTitle>
+                  <CardDescription className="text-lg text-[#644c6a]">
+                    Upload multiple products at once using a CSV file. Download
+                    the template to get started.
+                  </CardDescription>
+                </div>
 
-  {/* Right Side (Download Template Button) */}
-  <a
-    href="/templates/sample-product-template.xlsx" // <-- place your sample.csv in /public/templates/
-    download
-    className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#8a5d95] to-[#644c6a] rounded-lg shadow hover:opacity-90 transition-all duration-300"
-  >
-    <FileSpreadsheet className="h-4 w-4 mr-2" />
-    Download Template
-  </a>
-</CardHeader>
+              {/* Right Side (Download Template Buttons) */}
+              <div className="mt-4 sm:mt-0 flex items-center gap-3 sm:justify-end">
+                <a
+                  href="/templates/SSC_Guidelines.pdf" // <-- place your sample.csv in /public/templates/
+                  download
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#8a5d95] to-[#644c6a] rounded-lg shadow hover:opacity-90 transition-all duration-300"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Download Guidelines
+                </a>
+                <a
+                  href="/templates/sample-product-template.xlsx" // <-- place your sample.csv in /public/templates/
+                  download
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#8a5d95] to-[#644c6a] rounded-lg shadow hover:opacity-90 transition-all duration-300"
+                >
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Download Template
+                </a>
+              </div>
+              </CardHeader>
 
               <CardContent>
                 <BulkProductUploader />

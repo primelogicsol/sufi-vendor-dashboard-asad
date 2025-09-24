@@ -394,6 +394,14 @@ import { Loader2, Upload, X } from "lucide-react";
 import { BulkUploadClient } from "@/lib/utils/bulk-upload-client";
 import { toast } from "sonner";
 
+type CsvUploadResponse = {
+  success: boolean;
+  message?: string;
+  error?: string;
+  errors?: string[];
+  [key: string]: unknown;
+};
+
 const categories = [
   "accessories",
   "decorations",
@@ -467,13 +475,35 @@ export default function BulkProductUploader() {
         selectedCategory,
         formData
       );
-      
-      if (!response.ok) throw new Error("CSV Upload failed");
-      toast.success("🎉 CSV Upload successful!");
-      
-      // window.location.reload();
-      setFile(null);
-      // setSelectedCategory(null);
+
+      const data: CsvUploadResponse = await response
+        .json()
+        .catch(() => ({ success: false, error: "Invalid server response" } as CsvUploadResponse));
+      console.log("CSV upload response status:", response.status, response.statusText);
+      console.log("CSV upload response body:", data);
+
+      if (!response.ok) {
+        const message = (data && (data.error || data.message)) || "CSV Upload failed";
+        const errors = Array.isArray((data as Partial<CsvUploadResponse>)?.errors)
+          ? (data as Partial<CsvUploadResponse>).errors as string[]
+          : [];
+        const details = errors.length ? ` — ${errors.slice(0, 5).join(" | ")}` : "";
+        toast.error(`${message}${details}`);
+        throw new Error(message);
+      }
+
+      if (data?.success) {
+        toast.success("🎉 CSV Upload successful!");
+        setFile(null);
+      } else {
+        const message = (data && (data.error || data.message)) || "CSV Upload failed";
+        const errors = Array.isArray((data as Partial<CsvUploadResponse>)?.errors)
+          ? (data as Partial<CsvUploadResponse>).errors as string[]
+          : [];
+        const details = errors.length ? ` — ${errors.slice(0, 5).join(" | ")}` : "";
+        toast.error(`${message}${details}`);
+        throw new Error(message);
+      }
     } catch (err) {
       console.error("❌ CSV Upload error:", err);
       toast.error("❌ CSV Upload failed: " + (err as Error).message);
@@ -507,22 +537,30 @@ export default function BulkProductUploader() {
         image
       );
 
+      const data = await response.json().catch(() => ({ success: false, error: "Invalid server response" }));
+      console.log("Image upload response status:", response.status, response.statusText);
+      console.log("Image upload response body:", data);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Image upload failed");
+        const message = (data && (data.error || data.message)) || "Image upload failed";
+        throw new Error(message);
       }
 
-      toast.success("🎉 Image uploaded successfully!");
-      
-      // Reset form and refresh page
-      setSku("");
-      setImage(null);
-      setImagePreview(null);
-      
-      // Refresh the page
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      if (data?.success) {
+        toast.success("🎉 Image uploaded successfully!");
+        
+        // Reset form and refresh page
+        setSku("");
+        setImage(null);
+        setImagePreview(null);
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        const message = (data && (data.error || data.message)) || "Image upload failed";
+        throw new Error(message);
+      }
 
     } catch (err) {
       console.error("❌ Image upload error:", err);
@@ -596,6 +634,7 @@ export default function BulkProductUploader() {
             Upload CSV
           </Button>
         </div>
+      {false && <div />}
       </div>
 
       {/* Separator */}

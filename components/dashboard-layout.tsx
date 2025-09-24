@@ -7,8 +7,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-
-import { LayoutDashboard, Upload, Menu, X, Store, BarChart3, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import Image from "next/image"
+import { LayoutDashboard, Upload, Menu, X,  PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
 const navigation = [
   {
@@ -61,14 +61,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             sidebarCollapsed && "lg:justify-center lg:px-4",
           )}>
             <div className={cn("flex items-center space-x-2", sidebarCollapsed && "lg:space-x-0") }>
-              <Store className="h-8 w-8 text-primary-foreground" />
+              {/* <Image src="/logo.webp" alt="Logo" width={28} height={28} priority /> */}
               <span
                 className={cn(
                   "text-xl font-bold text-primary-foreground ml-2 transition-all duration-300",
                   sidebarCollapsed && "lg:opacity-0 lg:w-0 lg:ml-0 lg:overflow-hidden",
                 )}
               >
-                VendorHub
+                SSC VendorHub
               </span>
             </div>
             <Button
@@ -156,8 +156,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
           <div className="flex items-center space-x-4">
             <div className="hidden sm:flex items-center space-x-2">
-              <BarChart3 className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Vendor Dashboard</span>
+            <Image src="/logo.webp" alt="Logo" width={48} height={48} priority />
+              <span className="text-sm text-muted-foreground">SSC Vendor Dashboard</span>
             </div>
           </div>
 
