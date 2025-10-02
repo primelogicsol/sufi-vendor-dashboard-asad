@@ -320,4 +320,21 @@ export class TokenManager {
     // Refresh if expires in next 5 minutes (300 seconds)
     return timeUntilExpiry < 300
   }
+
+  // Try to get current user id from stored user or token payload
+  static getUserId(): string | null {
+    const user = this.getUser()
+    if (user && (user as User).id) return (user as User).id
+
+    const access = this.getAccessToken()
+    if (!access) return null
+    const payload = this.decodeToken(access)
+    if (!payload) return null
+    const possible =
+      (payload['vendorId'] as string) ||
+      (payload['sub'] as string) ||
+      (payload['id'] as string) ||
+      (payload['userId'] as string)
+    return possible || null
+  }
 }

@@ -26,6 +26,11 @@ const navigation = [
   //   href: "/products",
   //   icon: Package,
   // },
+  {
+    name: "Orders",
+    href: "/orders",
+    icon: LayoutDashboard,
+  },
 ]
 
 interface DashboardLayoutProps {
