@@ -1,15 +1,24 @@
 // types/orders.ts
 
-export type OrderStatus =
+// export type OrderStatus =
+//   | "PENDING"
+//   | "CONFIRMED"
+//   | "PROCESSING"
+//   | "SHIPPED"
+//   | "IN_TRANSIT"
+//   | "DELIVERED"
+//   | "COMPLETED"
+//   | "FAILED"
+//   | "CANCELLED"
+//   | "RETURNED"
+//   | "REFUNDED";
+
+  export type OrderStatus =
   | "PENDING"
-  | "PROCESSING"
-  | "CONFIRMED"
-  | "SHIPPED"
-  | "DELIVERED"
-  | "CANCELLED"
-  | "RETURN_REQUESTED"
-  | "RETURNED"
-  | "FAILED";
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
+
 
 export interface PaginationMeta {
   page: number;
@@ -27,6 +36,19 @@ export interface VendorOrderListQuery {
   search?: string; // admin only
 }
 
+export interface VendorOrderListQueryAdvanced {
+  status?: OrderStatus;
+  paymentStatus?: "PAID" | "UNPAID" | "REFUNDED";
+  priority?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  amountMin?: number;
+  amountMax?: number;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface OrderSummary {
   id: string;
   paymentStatus?: "PAID" | "UNPAID" | "REFUNDED";
@@ -35,14 +57,39 @@ export interface OrderSummary {
 }
 
 export interface OrderItem {
-  id: string;
-  orderId: string;
-  productId: string;
+  id: string | number;
+  orderId: string | number;
+  category: string;
+  productId: string | number;
   title?: string;
   price: number;
   quantity: number;
   status: OrderStatus;
-  order?: OrderSummary;
+  trackingNumber?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  product?: {
+    title: string;
+    sku: string;
+  };
+  order?: {
+    id: string | number;
+    userId: string;
+    amount: number;
+    status: OrderStatus;
+    paymentStatus: "PAID" | "UNPAID" | "REFUNDED";
+    fullName: string;
+    email: string;
+    phone: string | null;
+    shippingAddress: string;
+    createdAt: string;
+    user?: {
+      id: string;
+      fullName: string;
+      email: string;
+      phone: string | null;
+    };
+  };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -51,7 +98,16 @@ export interface VendorOrderListResponse {
   success?: boolean;
   message?: string;
   data: {
-    orderItems: OrderItem[];
+    orders: OrderItem[];
+    pagination: PaginationMeta;
+  };
+}
+
+export interface VendorOrderListResponseAdvanced {
+  success?: boolean;
+  message?: string;
+  data: {
+    orders: OrderItem[];
     pagination: PaginationMeta;
   };
 }
@@ -79,6 +135,29 @@ export interface VendorOrderStatsResponse {
     ordersByStatus: Array<{
       status: OrderStatus;
       _count: { status: number };
+    }>;
+  };
+}
+
+export interface VendorAnalyticsResponse {
+  success?: boolean;
+  message?: string;
+  data: {
+    totalOrders: number;
+    totalRevenue: number;
+    averageOrderValue: number;
+    statusDistribution: Record<OrderStatus, number>;
+    paymentStatusDistribution: Record<string, number>;
+    timeSeriesData: Array<{
+      date: string;
+      orders: number;
+      revenue: number;
+    }>;
+    topProducts: Array<{
+      productId: number;
+      category: string;
+      quantity: number;
+      revenue: number;
     }>;
   };
 }

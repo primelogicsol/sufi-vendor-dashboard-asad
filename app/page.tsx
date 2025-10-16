@@ -894,8 +894,23 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Vendor Dashboard</h1>
+          <div className="flex gap-2">
+            {/* <Button asChild variant="outline">
+              <a href="/orders">Orders</a>
+            </Button> */}
+            {/* <Button asChild variant="outline">
+              <a href="/inventory">Inventory</a>
+            </Button> */}
+            {/* <Button asChild variant="outline">
+              <a href="/analytics">Analytics</a>
+            </Button> */}
+          </div>
+        </div>
+        
         <div>
-          <h1 className="text-3xl font-bold">My Products</h1>
+          <h2 className="text-2xl font-semibold mb-4">My Products</h2>
         </div>
 
         <Card className="p-6">

@@ -6,7 +6,7 @@ import { OrdersClient } from '@/lib/utils/orders-client'
 import type { VendorOrderStatsResponse, OrderStatus } from '@/types/orders'
 import { useAuth } from '@/components/auth/auth-provider'
 import { TokenManager } from '@/lib/auth/token-manager'
-import { DollarSign, Package, Clock, Truck, CheckCircle, XCircle, RotateCcw, AlertCircle } from 'lucide-react'
+import { DollarSign, Package, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 
 export function VendorKpis() {
   const { user, isAuthenticated } = useAuth()
@@ -36,22 +36,10 @@ export function VendorKpis() {
 
   const statusCards: { key: OrderStatus; label: string; icon: React.ReactNode; color: string }[] = [
     { key: "PENDING", label: "Pending", icon: <Clock className="w-5 h-5" />, color: "text-yellow-600" },
-    { key: "PROCESSING", label: "Processing", icon: <Package className="w-5 h-5" />, color: "text-blue-600" },
-    { key: "SHIPPED", label: "Shipped", icon: <Truck className="w-5 h-5" />, color: "text-purple-600" },
-    { key: "DELIVERED", label: "Delivered", icon: <CheckCircle className="w-5 h-5" />, color: "text-green-600" },
+    { key: "COMPLETED", label: "Completed", icon: <CheckCircle className="w-5 h-5" />, color: "text-green-600" },
     { key: "CANCELLED", label: "Cancelled", icon: <XCircle className="w-5 h-5" />, color: "text-red-600" },
-    { key: "RETURNED", label: "Returned", icon: <RotateCcw className="w-5 h-5" />, color: "text-orange-600" },
     { key: "FAILED", label: "Failed", icon: <AlertCircle className="w-5 h-5" />, color: "text-gray-600" },
-    { key: "PENDING", label: "Total Orders", icon: <Package className="w-5 h-5" />, color: "text-indigo-600" },
   ]
-
-  // Replace last item with Total Orders
-  statusCards[7] = { 
-    key: "PENDING", 
-    label: "Total Orders", 
-    icon: <Package className="w-5 h-5" />, 
-    color: "text-indigo-600" 
-  }
 
   return (
     <div className="space-y-6">
@@ -106,119 +94,36 @@ export function VendorKpis() {
             </div>
           </div>
 
-      {/* Order Status Grid - 4x2 Layout */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* First Row - Main Status Cards */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${statusCards[0].color}`}>
-                {statusCards[0].icon}
+      {/* Order Status Grid - 5 Cards Layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {statusCards.map((card) => (
+          <Card key={card.key} className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className={card.color}>
+                  {card.icon}
+                </div>
+                <span className={`text-3xl font-bold ${card.color}`}>
+                  {byStatusMap.get(card.key) ?? 0}
+                </span>
               </div>
-              <span className={`text-3xl font-bold ${statusCards[0].color}`}>
-                {byStatusMap.get(statusCards[0].key) ?? 0}
-              </span>
-            </div>
-            <p className="text-sm font-medium text-gray-600">{statusCards[0].label}</p>
-          </CardContent>
-        </Card>
+              <p className="text-sm font-medium text-gray-600">{card.label}</p>
+            </CardContent>
+          </Card>
+        ))}
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${statusCards[1].color}`}>
-                {statusCards[1].icon}
-              </div>
-              <span className={`text-3xl font-bold ${statusCards[1].color}`}>
-                {byStatusMap.get(statusCards[1].key) ?? 0}
-              </span>
-            </div>
-            <p className="text-sm font-medium text-gray-600">{statusCards[1].label}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${statusCards[2].color}`}>
-                {statusCards[2].icon}
-              </div>
-              <span className={`text-3xl font-bold ${statusCards[2].color}`}>
-                {byStatusMap.get(statusCards[2].key) ?? 0}
-              </span>
-            </div>
-            <p className="text-sm font-medium text-gray-600">{statusCards[2].label}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${statusCards[3].color}`}>
-                {statusCards[3].icon}
-              </div>
-              <span className={`text-3xl font-bold ${statusCards[3].color}`}>
-                {byStatusMap.get(statusCards[3].key) ?? 0}
-              </span>
-            </div>
-            <p className="text-sm font-medium text-gray-600">{statusCards[3].label}</p>
-          </CardContent>
-        </Card>
-
-        {/* Second Row */}
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${statusCards[4].color}`}>
-                {statusCards[4].icon}
-              </div>
-              <span className={`text-3xl font-bold ${statusCards[4].color}`}>
-                {byStatusMap.get(statusCards[4].key) ?? 0}
-              </span>
-            </div>
-            <p className="text-sm font-medium text-gray-600">{statusCards[4].label}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${statusCards[5].color}`}>
-                {statusCards[5].icon}
-              </div>
-              <span className={`text-3xl font-bold ${statusCards[5].color}`}>
-                {byStatusMap.get(statusCards[5].key) ?? 0}
-              </span>
-            </div>
-            <p className="text-sm font-medium text-gray-600">{statusCards[5].label}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${statusCards[6].color}`}>
-                {statusCards[6].icon}
-              </div>
-              <span className={`text-3xl font-bold ${statusCards[6].color}`}>
-                {byStatusMap.get(statusCards[6].key) ?? 0}
-              </span>
-            </div>
-            <p className="text-sm font-medium text-gray-600">{statusCards[6].label}</p>
-          </CardContent>
-        </Card>
-
+        {/* Total Orders Card */}
         <Card className="hover:shadow-lg transition-shadow bg-gradient-to-br from-indigo-50 to-blue-50">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className={`${statusCards[7].color}`}>
-                {statusCards[7].icon}
+              <div className="text-indigo-600">
+                <Package className="w-5 h-5" />
               </div>
-              <span className={`text-3xl font-bold ${statusCards[7].color}`}>
+              <span className="text-3xl font-bold text-indigo-600">
                 {stats?.totalOrders ?? 0}
               </span>
             </div>
-            <p className="text-sm font-medium text-gray-600">{statusCards[7].label}</p>
+            <p className="text-sm font-medium text-gray-600">Total Orders</p>
           </CardContent>
         </Card>
       </div>

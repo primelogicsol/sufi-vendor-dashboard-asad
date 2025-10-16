@@ -45,15 +45,17 @@ import { ApiClient } from '@/lib/utils/api-client'
 import type {
   VendorOrderListQuery,
   VendorOrderListResponse,
+  VendorOrderListQueryAdvanced,
+  VendorOrderListResponseAdvanced,
   UpdateOrderItemStatusBody,
   UpdateOrderItemStatusResponse,
   VendorOrderStatsResponse,
+  VendorAnalyticsResponse,
   OrderItem,
 } from '@/types/orders'
 
 export class OrdersClient {
   static async listVendorOrderItems(
-    vendorId: string,
     query: VendorOrderListQuery = {}
   ): Promise<VendorOrderListResponse> {
     const params = new URLSearchParams()
@@ -64,12 +66,12 @@ export class OrdersClient {
     if (query.endDate) params.set('endDate', query.endDate)
     if (query.search) params.set('search', query.search)
 
-    const finalUrl = `/vendor-orders/${vendorId}?${params.toString()}`
+    const finalUrl = `/vendor/orders?${params.toString()}`
     console.log('[OrdersClient] listVendorOrderItems → URL:', finalUrl)
     console.log('[OrdersClient] listVendorOrderItems → Query Params:', query)
 
     try {
-      const response = await ApiClient.postJson<VendorOrderListResponse>(finalUrl, {})
+      const response = await ApiClient.getJson<VendorOrderListResponse>(finalUrl)
       console.log('[OrdersClient] listVendorOrderItems → Response:', response)
       return response
     } catch (error) {
@@ -83,9 +85,9 @@ export class OrdersClient {
     console.log('[OrdersClient] getOrderItemDetail → URL:', url)
 
     try {
-      const response = await ApiClient.getJson<OrderItem>(url)
+      const response = await ApiClient.getJson<{ success: boolean; data: OrderItem; message?: string }>(url)
       console.log('[OrdersClient] getOrderItemDetail → Response:', response)
-      return response
+      return response.data
     } catch (error) {
       console.error('[OrdersClient] getOrderItemDetail → Error:', error)
       throw error
@@ -121,6 +123,57 @@ export class OrdersClient {
       return response
     } catch (error) {
       console.error('[OrdersClient] getVendorOrderStats → Error:', error)
+      throw error
+    }
+  }
+
+  // Advanced order management APIs
+  static async listVendorOrdersAdvanced(
+    query: VendorOrderListQueryAdvanced = {}
+  ): Promise<VendorOrderListResponseAdvanced> {
+    const params = new URLSearchParams()
+    if (query.status) params.set('status', query.status)
+    if (query.paymentStatus) params.set('paymentStatus', query.paymentStatus)
+    if (query.priority) params.set('priority', query.priority)
+    if (query.dateFrom) params.set('dateFrom', query.dateFrom)
+    if (query.dateTo) params.set('dateTo', query.dateTo)
+    if (query.amountMin) params.set('amountMin', String(query.amountMin))
+    if (query.amountMax) params.set('amountMax', String(query.amountMax))
+    if (query.search) params.set('search', query.search)
+    if (query.page) params.set('page', String(query.page))
+    if (query.limit) params.set('limit', String(query.limit))
+
+    const url = `/vendor/orders?${params.toString()}`
+    console.log('[OrdersClient] listVendorOrdersAdvanced → URL:', url)
+    console.log('[OrdersClient] listVendorOrdersAdvanced → Query Params:', query)
+
+    try {
+      const response = await ApiClient.getJson<VendorOrderListResponseAdvanced>(url)
+      console.log('[OrdersClient] listVendorOrdersAdvanced → Response:', response)
+      return response
+    } catch (error) {
+      console.error('[OrdersClient] listVendorOrdersAdvanced → Error:', error)
+      throw error
+    }
+  }
+
+  static async getVendorAnalytics(
+    period: string = '30d',
+    groupBy: string = 'day'
+  ): Promise<VendorAnalyticsResponse> {
+    const params = new URLSearchParams()
+    params.set('period', period)
+    params.set('groupBy', groupBy)
+
+    const url = `/user/orders/vendor/analytics?${params.toString()}`
+    console.log('[OrdersClient] getVendorAnalytics → URL:', url)
+
+    try {
+      const response = await ApiClient.getJson<VendorAnalyticsResponse>(url)
+      console.log('[OrdersClient] getVendorAnalytics → Response:', response)
+      return response
+    } catch (error) {
+      console.error('[OrdersClient] getVendorAnalytics → Error:', error)
       throw error
     }
   }

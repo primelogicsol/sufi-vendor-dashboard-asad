@@ -9,7 +9,7 @@ export class AuthService {
   // Login user
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/login`, {
+      const response = await fetch(`${API_BASE_URL}/vendor-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,9 +28,10 @@ export class AuthService {
      
       console.log(data.data.accessToken, data.data.refreshToken)
       // Check if response has the expected token structure
-      if (data.data.accessToken && data.data.refreshToken) {
+      if (data.data && data.data.accessToken) {
         const tokens = {
           accessToken: data.data.accessToken,
+          // Some backends may not return refreshToken on vendor login
           refreshToken: data.data.refreshToken,
         }
 
@@ -38,8 +39,8 @@ export class AuthService {
         TokenManager.setTokens(tokens)
 
         // Store user info if available
-        if (data.user) {
-          TokenManager.setUser(data.user)
+        if (data.user || data.data.user) {
+          TokenManager.setUser(data.user || data.data.user)
         }
 
         return {
