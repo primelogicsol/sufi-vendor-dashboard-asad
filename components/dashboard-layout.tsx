@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { LayoutDashboard, Upload, Menu, X,  PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { LayoutDashboard,Package, Upload, Menu, X,  PanelLeftClose, PanelLeftOpen } from "lucide-react"
 
 const navigation = [
   {
@@ -21,11 +21,11 @@ const navigation = [
     href: "/upload",
     icon: Upload,
   },
-  // {
-  //   name: "My Products",
-  //   href: "/products",
-  //   icon: Package,
-  // },
+  {
+    name: "Zone Rates",
+    href: "/zonerates",
+    icon: Package,
+  },
   {
     name: "Orders",
     href: "/orders",
