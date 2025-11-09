@@ -1,81 +1,3 @@
-// "use client"
-
-// import React, { useEffect, useState, Suspense } from 'react'
-// import { useSearchParams } from 'next/navigation'
-// import { OrdersClient } from '@/lib/utils/orders-client'
-// import type { OrderItem } from '@/types/orders'
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-// import { Button } from '@/components/ui/button'
-
-// function OrderItemContent() {
-//   const searchParams = useSearchParams()
-//   const orderItemId = searchParams.get('orderItemId') || ''
-  
-//   const [item, setItem] = useState<OrderItem | null>(null)
-//   const [loading, setLoading] = useState<boolean>(false)
-//   const [error, setError] = useState<string | null>(null)
-
-//   useEffect(() => {
-//     const run = async () => {
-//       if (!orderItemId) return
-//       setLoading(true)
-//       setError(null)
-//       try {
-//         const detail = await OrdersClient.getOrderItemDetail(orderItemId)
-//         setItem(detail)
-//       } catch (e) {
-//         setError(e instanceof Error ? e.message : 'Failed to load order item')
-//       } finally {
-//         setLoading(false)
-//       }
-//     }
-//     run()
-//   }, [orderItemId])
-
-//   return (
-//     <div className="p-4">
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>Order Item {orderItemId ? `#${orderItemId}` : ''}</CardTitle>
-//         </CardHeader>
-//         <CardContent>
-//           {!orderItemId && <div className="text-sm text-muted-foreground">Provide an orderItemId in the URL query.</div>}
-//           {loading && <div>Loading...</div>}
-//           {error && <div className="text-red-600 text-sm">{error}</div>}
-//           {item && (
-//             <div className="space-y-2">
-//               <div><span className="font-medium">Title:</span> {item.title || item.productId}</div>
-//               <div><span className="font-medium">Status:</span> {item.status}</div>
-//               <div><span className="font-medium">Price:</span> {item.price}</div>
-//               <div><span className="font-medium">Quantity:</span> {item.quantity}</div>
-//               <div><span className="font-medium">Order Id:</span> {item.orderId}</div>
-//               <div><span className="font-medium">Payment:</span> {item.order?.paymentStatus}</div>
-//               <div><span className="font-medium">Category:</span> {item.category}</div>
-//               <div><span className="font-medium">Order Status:</span> {item.order?.status}</div>
-//               <div><span className="font-medium">Customer Name:</span> {item.order?.fullName || item.order?.user?.fullName}</div>
-//               <div><span className="font-medium">Customer Email:</span> {item.order?.email || item.order?.user?.email}</div>
-//               <div><span className="font-medium">Customer Phone:</span> {item.order?.phone || item.order?.user?.phone || ''}</div>
-//               <div><span className="font-medium">Shipping Address:</span> {item.order?.shippingAddress}</div>
-//               <div><span className="font-medium">Created:</span> {item.createdAt?.slice(0,10)}</div>
-//               <div className="pt-2">
-//                 <Button variant="outline" onClick={() => history.back()}>Back</Button>
-//               </div>
-//             </div>
-//           )}
-//         </CardContent>
-//       </Card>
-//     </div>
-//   )
-// }
-
-// export default function OrderItemDetailPage() {
-//   return (
-//     <Suspense fallback={<div className="p-4">Loading...</div>}>
-//       <OrderItemContent />
-//     </Suspense>
-//   )
-// }
-
 "use client"
 
 import React, { useEffect, useState, Suspense } from 'react'
@@ -84,32 +6,78 @@ import { OrdersClient } from '@/lib/utils/orders-client'
 import type { OrderItem } from '@/types/orders'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Package, CreditCard, User, MapPin, Phone, Mail, Calendar, Hash, ShoppingBag, ArrowLeft, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { Package, CreditCard, User, MapPin, Phone, Mail, Calendar, Hash, ShoppingBag, ArrowLeft, CheckCircle, Clock, XCircle,  Barcode } from 'lucide-react'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ShippingClient } from '@/lib/utils/shipping-client'
+import type { ShipmentPublicStatus, ShipmentTrackingResponse } from '@/types/orders'
 
 function OrderItemContent() {
   const searchParams = useSearchParams()
-  const orderItemId = searchParams.get('orderItemId') || ''
+  const orderId = searchParams.get('ItemId') || ''
   
   const [item, setItem] = useState<OrderItem | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+  // const [creatingLabel, setCreatingLabel] = useState(false)
+  // const [labelForm, setLabelForm] = useState<CreateShippingLabelRequest>({ weight: 1, dimensions: { length: 10, width: 8, height: 6 }, serviceType: 'PRIORITY' })
+  const [trackingDialog, setTrackingDialog] = useState(false)
+  const [trackingData, setTrackingData] = useState<ShipmentTrackingResponse['data'] | null>(null)
+  const [updateDialog, setUpdateDialog] = useState(false)
+  const [updateForm, setUpdateForm] = useState<{ status: ShipmentPublicStatus; location: string; notes: string }>({ status: 'PICKED_UP', location: '', notes: '' })
+  // const openTrackingDialog = async () => {
+  //   if (!item?.trackingNumber) return
+  //   setTrackingDialog(true)
+  //   setTrackingData(null)
+  //   try {
+  //     const res = await ShippingClient.getShipmentTracking(String(item.trackingNumber))
+  //     setTrackingData(res.data)
+  //   } catch (e) {
+  //     setError(e instanceof Error ? e.message : 'Failed to load tracking')
+  //   }
+  // }
+  // const openUpdateDialog = () => {
+  //   const fallbackLocation = item?.order?.shippingAddress || ''
+  //   setUpdateForm(prev => ({ ...prev, location: prev.location || fallbackLocation }))
+  //   setUpdateDialog(true)
+  // }
 
+  // useEffect(() => {
+  //   const run = async () => {
+  //     if (!orderItemId) return
+  //     setLoading(true)
+  //     setError(null)
+  //     try {
+  //       const detail = await OrdersClient.getOrderItemDetail(orderItemId)
+  //       setItem(detail)
+  //     } catch (e) {
+  //       setError(e instanceof Error ? e.message : 'Failed to load order item')
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
+  //   run()
+  // }, [orderItemId])
   useEffect(() => {
     const run = async () => {
-      if (!orderItemId) return
+      if (!orderId) return
       setLoading(true)
       setError(null)
       try {
-        const detail = await OrdersClient.getOrderItemDetail(orderItemId)
+        const detail = await OrdersClient.getOrderItemByOrderId(orderId)
         setItem(detail)
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load order item')
+        const errorMessage = e instanceof Error ? e.message : 'Failed to load order item'
+        setError(errorMessage)
+        console.error('Order item fetch error:', e)
       } finally {
         setLoading(false)
       }
     }
     run()
-  }, [orderItemId])
+  }, [orderId])
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -128,14 +96,14 @@ function OrderItemContent() {
     )
   }
 
-  if (!orderItemId) {
+  if (!orderId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 flex items-center justify-center">
         <Card className="max-w-md w-full shadow-lg">
           <CardContent className="pt-6">
             <div className="text-center">
               <Package className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">Please provide an orderItemId in the URL query.</p>
+              <p className="text-gray-600">Please provide an orderId in the URL query.</p>
             </div>
           </CardContent>
         </Card>
@@ -186,18 +154,30 @@ function OrderItemContent() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-              Order Item #{orderItemId}
+              Order #{orderId}
             </h1>
             <p className="text-gray-600">View detailed information about this order item</p>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={() => history.back()}
-            className="w-full sm:w-auto hover:bg-gray-100 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+          <div className="flex gap-2">
+            {item.trackingNumber && (
+              <Button 
+                variant="default" 
+                onClick={() => window.location.href = `/orders/tracking?trackingNumber=${encodeURIComponent(item.trackingNumber!)}`}
+                className="w-full sm:w-auto hover:bg-blue-700 transition-colors"
+              >
+                <Barcode className="w-4 h-4 mr-2" />
+                Show Tracking
+              </Button>
+            )}
+            <Button 
+              variant="outline" 
+              onClick={() => history.back()}
+              className="w-full sm:w-auto hover:bg-gray-100 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
@@ -226,6 +206,13 @@ function OrderItemContent() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Item Status</span>
                   {getStatusBadge(item.status)}
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-600 flex items-center gap-2"><Barcode className="w-4 h-4" /> Tracking</span>
+                    <span className="text-sm">{item.trackingNumber || '—'}</span>
+                  </div>
+                  
                 </div>
               </div>
             </CardContent>
@@ -304,6 +291,80 @@ function OrderItemContent() {
             </CardContent>
           </Card>
         </div>
+        {/* Tracking Dialog */}
+        <Dialog open={trackingDialog} onOpenChange={(open) => { if (!open) { setTrackingDialog(false); setTrackingData(null) } }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Tracking {item.trackingNumber}</DialogTitle>
+            </DialogHeader>
+            {!trackingData ? (
+              <div>Loading tracking...</div>
+            ) : (
+              <div className="space-y-3">
+                <div className="font-medium">Current Status: {trackingData.currentStatus}</div>
+                <div className="max-h-64 overflow-auto border rounded">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left">
+                        <th className="p-2">Time</th>
+                        <th className="p-2">Status</th>
+                        <th className="p-2">Location</th>
+                        <th className="p-2">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {trackingData.events.map((ev, i) => (
+                        <tr key={i} className="border-t">
+                          <td className="p-2">{new Date(ev.timestamp).toLocaleString()}</td>
+                          <td className="p-2">{ev.status}</td>
+                          <td className="p-2">{ev.location || '-'}</td>
+                          <td className="p-2">{ev.notes || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Update Status Dialog */}
+        <Dialog open={updateDialog} onOpenChange={(open) => { if (!open) setUpdateDialog(false) }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Shipment Status {item.trackingNumber ? `(${item.trackingNumber})` : ''}</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <Label>Status</Label>
+                <Select value={updateForm.status} onValueChange={(v) => setUpdateForm(prev => ({ ...prev, status: v as ShipmentPublicStatus }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['PICKED_UP','IN_TRANSIT','OUT_FOR_DELIVERY','DELIVERED','EXCEPTION','RETURNED'].map(s => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-2">
+                <Label>Location</Label>
+                <Input value={updateForm.location} onChange={(e) => setUpdateForm(v => ({ ...v, location: e.target.value }))} />
+                <p className="text-xs text-muted-foreground mt-1">Prefilled from order shipping address if available.</p>
+              </div>
+              <div className="col-span-2">
+                <Label>Notes</Label>
+                <Input value={updateForm.notes} onChange={(e) => setUpdateForm(v => ({ ...v, notes: e.target.value }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setUpdateDialog(false)}>Cancel</Button>
+              <Button onClick={async () => { if (!item?.trackingNumber) return; try { await ShippingClient.updateShipmentStatus(String(item.trackingNumber), updateForm); setUpdateDialog(false) } catch (e) { setError(e instanceof Error ? e.message : 'Failed to update shipment status') } }}>Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <style jsx>{`
@@ -382,3 +443,66 @@ export default function OrderItemDetailPage() {
     </Suspense>
   )
 }
+
+// Dialogs
+// function CreateLabelDialog({ open, onOpenChange, orderId, onCreated }: { open: boolean; onOpenChange: (v: boolean) => void; orderId: string | number; onCreated: () => void }) {
+//   const [form, setForm] = useState<CreateShippingLabelRequest>({ weight: 1, dimensions: { length: 10, width: 8, height: 6 }, serviceType: 'PRIORITY' })
+//   const [submitting, setSubmitting] = useState(false)
+//   const submit = async () => {
+//     try {
+//       setSubmitting(true)
+//       const res = await ShippingClient.createUspsLabel(orderId, form)
+//       if (res.data?.labelUrl) window.open(res.data.labelUrl, '_blank')
+//       onCreated()
+//       onOpenChange(false)
+//     } catch {
+//       // surface by consumer if needed
+//     } finally {
+//       setSubmitting(false)
+//     }
+//   }
+//   return (
+//     <Dialog open={open} onOpenChange={onOpenChange}>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle>Create USPS Label</DialogTitle>
+//         </DialogHeader>
+//         <div className="grid grid-cols-2 gap-3">
+//           <div className="col-span-2">
+//             <Label>Weight (oz)</Label>
+//             <Input type="number" min={0} step={0.1} value={form.weight} onChange={(e) => setForm(v => ({ ...v, weight: Number(e.target.value) }))} />
+//           </div>
+//           <div>
+//             <Label>Length (in)</Label>
+//             <Input type="number" min={0} value={form.dimensions.length} onChange={(e) => setForm(v => ({ ...v, dimensions: { ...v.dimensions, length: Number(e.target.value) } }))} />
+//           </div>
+//           <div>
+//             <Label>Width (in)</Label>
+//             <Input type="number" min={0} value={form.dimensions.width} onChange={(e) => setForm(v => ({ ...v, dimensions: { ...v.dimensions, width: Number(e.target.value) } }))} />
+//           </div>
+//           <div>
+//             <Label>Height (in)</Label>
+//             <Input type="number" min={0} value={form.dimensions.height} onChange={(e) => setForm(v => ({ ...v, dimensions: { ...v.dimensions, height: Number(e.target.value) } }))} />
+//           </div>
+//           <div className="col-span-2">
+//             <Label>Service Type</Label>
+//             <Select value={form.serviceType} onValueChange={(v) => setForm(prev => ({ ...prev, serviceType: v as 'PRIORITY' | 'FIRST_CLASS' | 'EXPRESS' | 'GROUND' }))}>
+//               <SelectTrigger>
+//                 <SelectValue />
+//               </SelectTrigger>
+//               <SelectContent>
+//                 {['PRIORITY', 'FIRST_CLASS', 'EXPRESS', 'GROUND'].map(s => (
+//                   <SelectItem key={s} value={s}>{s}</SelectItem>
+//                 ))}
+//               </SelectContent>
+//             </Select>
+//           </div>
+//         </div>
+//         <DialogFooter>
+//           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+//           <Button onClick={submit} disabled={submitting}>Create</Button>
+//         </DialogFooter>
+//       </DialogContent>
+//     </Dialog>
+//   )
+// }

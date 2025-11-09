@@ -22,15 +22,16 @@ const navigation = [
     icon: Upload,
   },
   {
+    name: "Order Management",
+    href: "/orders",
+    icon: LayoutDashboard,
+  },
+  {
     name: "Zone Rates",
     href: "/zonerates",
     icon: Package,
   },
-  {
-    name: "Orders",
-    href: "/orders",
-    icon: LayoutDashboard,
-  },
+  
 ]
 
 interface DashboardLayoutProps {

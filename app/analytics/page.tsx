@@ -4,12 +4,13 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '@/components/auth/auth-provider'
 import { AnalyticsClient } from '@/lib/utils/analytics-client'
 import { OrdersClient } from '@/lib/utils/orders-client'
+import type { VendorOrdersAnalyticsResponse } from '@/types/orders'
 import type { VendorOrderStatsResponse } from '@/types/orders'
 import { TokenManager } from '@/lib/auth/token-manager'
 import type { 
   SalesAnalytics, 
   InventoryAnalytics, 
-  VendorAnalytics, 
+  // VendorAnalytics, 
   AnalyticsOverview,
   TimePeriod,
   GroupBy
@@ -43,7 +44,8 @@ export default function AnalyticsPage() {
   const [groupBy, setGroupBy] = useState<GroupBy>('day')
   const [salesData, setSalesData] = useState<SalesAnalytics | null>(null)
   const [inventoryData, setInventoryData] = useState<InventoryAnalytics | null>(null)
-  const [vendorData, setVendorData] = useState<VendorAnalytics | null>(null)
+  // const [vendorData, setVendorData] = useState<VendorAnalytics | null>(null)
+  const [vendorOrdersAnalytics, setVendorOrdersAnalytics] = useState<VendorOrdersAnalyticsResponse['data'] | null>(null)
   const [overviewData, setOverviewData] = useState<AnalyticsOverview | null>(null)
   const [fallbackOrderStats, setFallbackOrderStats] = useState<VendorOrderStatsResponse['data'] | null>(null)
   const fetchAnalyticsData = useCallback(async () => {
@@ -150,25 +152,16 @@ export default function AnalyticsPage() {
         })
       }
 
-      // Try to get vendor analytics
+      // Try to get vendor analytics (new endpoint)
       try {
-        const vendorRes = await AnalyticsClient.getVendorAnalytics()
-        setVendorData(vendorRes.data)
+        const vendorRes = await OrdersClient.getVendorOrdersAnalytics(period)
+        setVendorOrdersAnalytics(vendorRes.data)
       } catch {
         console.warn('Vendor analytics API failed, using fallback data')
-        setVendorData({
-          vendorId: 'unknown',
-          totalRevenue: 0,
-          totalOrders: 0,
-          averageOrderValue: 0,
-          customerCount: 0,
-          productCount: 0,
-          rating: 0,
-          performance: {
-            fulfillmentRate: 0,
-            onTimeDelivery: 0,
-            returnRate: 0
-          }
+        setVendorOrdersAnalytics({
+          summary: { totalItems: 0, totalRevenue: 0, averageItemValue: 0 },
+          itemsByStatus: [],
+          recentItems: [],
         })
       }
 
@@ -192,8 +185,9 @@ export default function AnalyticsPage() {
     }).format(amount)
   }
 
-  const formatPercentage = (value: number) => {
-    return `${value.toFixed(1)}%`
+  const formatPercentage = (value: number | undefined | null) => {
+    const v = Number(value ?? 0)
+    return `${v.toFixed(1)}%`
   }
 
   return (
@@ -243,26 +237,7 @@ export default function AnalyticsPage() {
         </div>
       )}
 
-      {/* Debug Info */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card className="bg-gray-50">
-          <CardHeader>
-            <CardTitle className="text-sm">Debug Info</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs">
-            <div className="space-y-1">
-              <div>Loading: {loading ? 'Yes' : 'No'}</div>
-              <div>Authenticated: {isAuthenticated ? 'Yes' : 'No'}</div>
-              <div>Vendor ID: {vendorId || 'None'}</div>
-              <div>Overview Data: {overviewData ? 'Loaded' : 'Not loaded'}</div>
-              <div>Sales Data: {salesData ? 'Loaded' : 'Not loaded'}</div>
-              <div>Inventory Data: {inventoryData ? 'Loaded' : 'Not loaded'}</div>
-              <div>Vendor Data: {vendorData ? 'Loaded' : 'Not loaded'}</div>
-              <div>Fallback Stats: {fallbackOrderStats ? 'Loaded' : 'Not loaded'}</div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      
 
       {loading && (
         <div className="space-y-4">
@@ -446,7 +421,7 @@ export default function AnalyticsPage() {
                 <div className="text-sm text-muted-foreground">Low Stock</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{inventoryData.turnoverRate.toFixed(1)}x</div>
+              <div className="text-2xl font-bold">{Number(inventoryData.turnoverRate ?? 0).toFixed(1)}x</div>
                 <div className="text-sm text-muted-foreground">Turnover Rate</div>
               </div>
             </div>
@@ -468,7 +443,7 @@ export default function AnalyticsPage() {
                     <TableCell>{data.count}</TableCell>
                     <TableCell>{data.stock}</TableCell>
                     <TableCell>{formatCurrency(data.value)}</TableCell>
-                    <TableCell>{data.turnoverRate.toFixed(1)}x</TableCell>
+                    <TableCell>{Number(data.turnoverRate ?? 0).toFixed(1)}x</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -477,63 +452,68 @@ export default function AnalyticsPage() {
         </Card>
       )}
 
-      {/* Vendor Performance */}
-      {vendorData && !loading && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Vendor Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span>Total Revenue:</span>
-                  <span className="font-semibold">{formatCurrency(vendorData.totalRevenue)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Total Orders:</span>
-                  <span className="font-semibold">{vendorData.totalOrders}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Average Order Value:</span>
-                  <span className="font-semibold">{formatCurrency(vendorData.averageOrderValue)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Customer Count:</span>
-                  <span className="font-semibold">{vendorData.customerCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Product Count:</span>
-                  <span className="font-semibold">{vendorData.productCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Rating:</span>
-                  <span className="font-semibold">{vendorData.rating.toFixed(1)} ⭐</span>
-                </div>
+      {/* Vendor Orders Analytics (New Endpoint) */}
+      {vendorOrdersAnalytics && !loading && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Total Items</CardTitle></CardHeader>
+              <CardContent><div className="text-2xl font-bold">{vendorOrdersAnalytics.summary.totalItems}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Total Revenue</CardTitle></CardHeader>
+              <CardContent><div className="text-2xl font-bold">{formatCurrency(vendorOrdersAnalytics.summary.totalRevenue)}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Average Item Value</CardTitle></CardHeader>
+              <CardContent><div className="text-2xl font-bold">{formatCurrency(vendorOrdersAnalytics.summary.averageItemValue)}</div></CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader><CardTitle>Items by Status</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                {vendorOrdersAnalytics.itemsByStatus.map(s => (
+                  <div key={s.status} className="p-3 border rounded flex items-center justify-between">
+                    <span className="text-sm font-medium">{s.status}</span>
+                    <span className="text-xl font-bold">{s.count}</span>
+                  </div>
+                ))}
               </div>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span>Fulfillment Rate:</span>
-                  <span className="font-semibold text-green-600">
-                    {formatPercentage(vendorData.performance.fulfillmentRate)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>On-Time Delivery:</span>
-                  <span className="font-semibold text-blue-600">
-                    {formatPercentage(vendorData.performance.onTimeDelivery)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Return Rate:</span>
-                  <span className="font-semibold text-orange-600">
-                    {formatPercentage(vendorData.performance.returnRate)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle>Recent Items</CardTitle></CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Item ID</TableHead>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {vendorOrdersAnalytics.recentItems.slice(0, 10).map((it) => (
+                    <TableRow key={it.id}>
+                      <TableCell>{it.id}</TableCell>
+                      <TableCell>#{it.orderId}</TableCell>
+                      <TableCell>{it.status}</TableCell>
+                      <TableCell>{formatCurrency(it.price)}</TableCell>
+                      <TableCell>{it.order?.fullName || it.order?.user?.fullName || '—'}</TableCell>
+                      <TableCell>{new Date(it.createdAt).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Time Series Data */}
@@ -607,7 +587,7 @@ export default function AnalyticsPage() {
       )}
 
       {/* No Data Message */}
-      {!loading && !overviewData && !salesData && !inventoryData && !vendorData && !fallbackOrderStats && (
+      {!loading && !overviewData && !salesData && !inventoryData && !vendorOrdersAnalytics && !fallbackOrderStats && (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

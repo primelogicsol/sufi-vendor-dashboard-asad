@@ -47,7 +47,7 @@ export class ApiClient {
       }
 
       const accessToken = TokenManager.getAccessToken()
-      // console.log('Access Token:', accessToken);
+      console.log('Access Token:', accessToken);
       if (accessToken) {
         try {
           // const decodedToken = jwtDecode(accessToken);

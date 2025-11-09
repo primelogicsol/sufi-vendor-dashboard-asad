@@ -94,6 +94,19 @@ export class OrdersClient {
     }
   }
 
+  static async getOrderItemByOrderId(orderId: string | number): Promise<OrderItem> {
+    const url = `/vendor/orders/${orderId}`
+    console.log('[OrdersClient] getOrderItemByOrderId → URL:', url)
+    try {
+      const response = await ApiClient.getJson<{ success: boolean; data: OrderItem; message?: string }>(url)
+      console.log('[OrdersClient] getOrderItemByOrderId → Response:', response)
+      return response.data
+    } catch (error) {
+      console.error('[OrdersClient] getOrderItemByOrderId → Error:', error)
+      throw error
+    }
+  }
+
   static async bulkUpdateOrderItemStatus(
     ids: string[],
     body: UpdateOrderItemStatusBody
@@ -174,6 +187,23 @@ export class OrdersClient {
       return response
     } catch (error) {
       console.error('[OrdersClient] getVendorAnalytics → Error:', error)
+      throw error
+    }
+  }
+
+  // Vendor orders analytics (new backend endpoint)
+  static async getVendorOrdersAnalytics(period: '7d' | '30d' | '90d' | '1y' = '30d'):
+    Promise<import('@/types/orders').VendorOrdersAnalyticsResponse> {
+    const params = new URLSearchParams()
+    params.set('period', period)
+    const url = `/vendor/orders/analytics?${params.toString()}`
+    console.log('[OrdersClient] getVendorOrdersAnalytics → URL:', url)
+    try {
+      const response = await ApiClient.getJson<import('@/types/orders').VendorOrdersAnalyticsResponse>(url)
+      console.log('[OrdersClient] getVendorOrdersAnalytics → Response:', response)
+      return response
+    } catch (error) {
+      console.error('[OrdersClient] getVendorOrdersAnalytics → Error:', error)
       throw error
     }
   }

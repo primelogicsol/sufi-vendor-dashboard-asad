@@ -7,12 +7,17 @@ import { OrdersClient } from '@/lib/utils/orders-client'
 import type { OrderItem, OrderStatus, VendorOrderListResponse } from '@/types/orders'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { ShippingClient } from '@/lib/utils/shipping-client'
+import type { CreateShippingLabelRequest, ShipmentTrackingResponse, ShipmentPublicStatus } from '@/types/orders'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
+import { AuthService } from '@/lib/auth/auth-service'
 
 const STATUS_OPTIONS: OrderStatus[] = [
   "PENDING",
@@ -35,6 +40,20 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<VendorOrderListResponse['data'] | null>(null)
   const [selected, setSelected] = useState<Record<string, boolean>>({})
+  const [createLabelFor, setCreateLabelFor] = useState<OrderItem | null>(null)
+  const [labelForm, setLabelForm] = useState<CreateShippingLabelRequest>({
+    weight: 1,
+    dimensions: { length: 10, width: 8, height: 6 },
+    serviceType: 'PRIORITY'
+  })
+  const [trackingFor, setTrackingFor] = useState<string | null>(null)
+  const [trackingData, setTrackingData] = useState<ShipmentTrackingResponse['data'] | null>(null)
+  const [updatingFor, setUpdatingFor] = useState<string | null>(null)
+  const [updateForm, setUpdateForm] = useState<{ status: ShipmentPublicStatus; location: string; notes: string }>({
+    status: 'PICKED_UP',
+    location: '',
+    notes: ''
+  })
 
   const fetchOrders = async () => {
     if (!vendorId) return
@@ -96,6 +115,54 @@ export default function OrdersPage() {
     }
   }
 
+  const submitCreateLabel = async () => {
+    if (!createLabelFor) return
+    try {
+      setLoading(true)
+      // Ensure we have a valid access token before making the request
+      const hasValid = await AuthService.ensureValidToken()
+      if (!hasValid) {
+        throw new Error('Authentication required. Please sign in again.')
+      }
+      const res = await ShippingClient.createUspsLabel(createLabelFor.orderId, labelForm)
+      console.log('Create Label API Response:', res)
+      // Refresh list to reflect tracking number if backend persists to order item
+      await fetchOrders()
+      setCreateLabelFor(null)
+      // If label URL provided, open in new tab
+      if (res.data?.labelUrl) window.open(res.data.labelUrl, '_blank')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to create shipping label')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openTracking = async (trackingNumber: string) => {
+    try {
+      setTrackingFor(trackingNumber)
+      setTrackingData(null)
+      const res = await ShippingClient.getShipmentTracking(trackingNumber)
+      setTrackingData(res.data)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to fetch tracking info')
+    }
+  }
+
+  const submitUpdateStatus = async () => {
+    if (!updatingFor) return
+    try {
+      setLoading(true)
+      await ShippingClient.updateShipmentStatus(updatingFor, updateForm)
+      setUpdatingFor(null)
+      await fetchOrders()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to update shipment status')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -108,6 +175,9 @@ export default function OrdersPage() {
           </Link> */}
           <Link href="/orders/stats">
             <Button variant="outline">View Stats</Button>
+          </Link>
+          <Link href="/analytics">
+            <Button variant="outline">Analytics</Button>
           </Link>
         </div>
       </div>
@@ -246,6 +316,7 @@ export default function OrdersPage() {
                     <TableCell>
                       <div>
                         <div className="font-medium">#{item.orderId}</div>
+                        {/* 'orderid {item.orderId} and id is {item.id}' */}
                         <div className="text-sm text-muted-foreground">
                           {item.order?.paymentStatus === 'PAID' ? '✅ Paid' : '⏳ Pending'}
                         </div>
@@ -253,7 +324,17 @@ export default function OrdersPage() {
                     </TableCell>
                     <TableCell>{item.createdAt?.slice(0, 10)}</TableCell>
                     <TableCell>
-                      <Button size="sm" onClick={() => { window.location.href = `/orders/item?orderItemId=${String(item.id)}` }}>Details</Button>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => { window.location.href = `/orders/item?ItemId=${String(item.id)}` }}>Details</Button>
+                        {item.trackingNumber ? (
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => openTracking(String(item.trackingNumber))}>Track</Button>
+                            <Button size="sm" variant="secondary" onClick={() => setUpdatingFor(String(item.trackingNumber))}>Update Status</Button>
+                          </>
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => { setCreateLabelFor(item); setLabelForm({ weight: 1, dimensions: { length: 10, width: 8, height: 6 }, serviceType: 'PRIORITY' }) }}>Create Label</Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -269,6 +350,128 @@ export default function OrdersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Create Label Dialog */}
+      <Dialog open={!!createLabelFor} onOpenChange={(open) => { if (!open) setCreateLabelFor(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create USPS Label {createLabelFor ? `for Order #${createLabelFor.orderId}` : ''}</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <Label>Weight (oz)</Label>
+              <Input type="number" min={0} step={0.1} value={labelForm.weight}
+                onChange={(e) => setLabelForm(v => ({ ...v, weight: Number(e.target.value) }))} />
+            </div>
+            <div>
+              <Label>Length (in)</Label>
+              <Input type="number" min={0} value={labelForm.dimensions.length}
+                onChange={(e) => setLabelForm(v => ({ ...v, dimensions: { ...v.dimensions, length: Number(e.target.value) } }))} />
+            </div>
+            <div>
+              <Label>Width (in)</Label>
+              <Input type="number" min={0} value={labelForm.dimensions.width}
+                onChange={(e) => setLabelForm(v => ({ ...v, dimensions: { ...v.dimensions, width: Number(e.target.value) } }))} />
+            </div>
+            <div>
+              <Label>Height (in)</Label>
+              <Input type="number" min={0} value={labelForm.dimensions.height}
+                onChange={(e) => setLabelForm(v => ({ ...v, dimensions: { ...v.dimensions, height: Number(e.target.value) } }))} />
+            </div>
+            <div className="col-span-2">
+              <Label>Service Type</Label>
+              <Select value={labelForm.serviceType} onValueChange={(v) => setLabelForm(prev => ({ ...prev, serviceType: v as 'PRIORITY' | 'PRIORITY_EXPRESS' | 'FIRST_CLASS' | 'GROUND_ADVANTAGE' | 'MEDIA_MAIL' | 'RETAIL_GROUND' }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {['PRIORITY', 'PRIORITY_EXPRESS', 'FIRST_CLASS', 'GROUND_ADVANTAGE', 'MEDIA_MAIL', 'RETAIL_GROUND'].map(s => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateLabelFor(null)}>Cancel</Button>
+            <Button onClick={submitCreateLabel} disabled={loading}>Create Label</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tracking Dialog */}
+      <Dialog open={!!trackingFor} onOpenChange={(open) => { if (!open) setTrackingFor(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tracking {trackingFor}</DialogTitle>
+          </DialogHeader>
+          {!trackingData ? (
+            <div>Loading tracking...</div>
+          ) : (
+            <div className="space-y-3">
+              <div className="font-medium">Current Status: {trackingData.currentStatus}</div>
+              <div className="max-h-64 overflow-auto border rounded">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Notes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {trackingData.events.map((ev, i) => (
+                      <TableRow key={i}>
+                        <TableCell>{new Date(ev.timestamp).toLocaleString()}</TableCell>
+                        <TableCell>{ev.status}</TableCell>
+                        <TableCell>{ev.location || '-'}</TableCell>
+                        <TableCell>{ev.notes || '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Status Dialog */}
+      <Dialog open={!!updatingFor} onOpenChange={(open) => { if (!open) setUpdatingFor(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Shipment Status {updatingFor ? `(${updatingFor})` : ''}</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <Label>Status</Label>
+              <Select value={updateForm.status} onValueChange={(v) => setUpdateForm(prev => ({ ...prev, status: v as "PICKED_UP" | "IN_TRANSIT" | "OUT_FOR_DELIVERY" | "DELIVERED" | "EXCEPTION" | "RETURNED" }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {['PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'DELIVERED', 'EXCEPTION', 'RETURNED'].map(s => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="col-span-2">
+              <Label>Location</Label>
+              <Input value={updateForm.location} onChange={(e) => setUpdateForm(v => ({ ...v, location: e.target.value }))} />
+            </div>
+            <div className="col-span-2">
+              <Label>Notes</Label>
+              <Input value={updateForm.notes} onChange={(e) => setUpdateForm(v => ({ ...v, notes: e.target.value }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUpdatingFor(null)}>Cancel</Button>
+            <Button onClick={submitUpdateStatus} disabled={loading}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
