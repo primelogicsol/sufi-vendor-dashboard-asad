@@ -156,6 +156,18 @@ export function ProductUpdateModal({
     });
   };
 
+  const countCharacters = (text: string): number => {
+    if (!text) return 0;
+    return text.length;
+  };
+
+  const handleTextareaChange = (field: 'description' | 'care', value: string) => {
+    const charCount = countCharacters(value);
+    if (charCount <= 50) {
+      handleInputChange(field, value);
+    }
+  };
+
   // const handleArrayInputChange = (field: keyof FormState, value: string) => {
   //   const arrayValue = value.split(',').map(item => item.trim()).filter(item => item);
   //   setFormData((prev) => ({
@@ -384,7 +396,7 @@ export function ProductUpdateModal({
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Heart className="h-5 w-5" />
-              Description & Care
+              Description & Care <span className="text-sm text-gray-500">(Max. 50 characters)</span>
             </h3>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -392,20 +404,26 @@ export function ProductUpdateModal({
                 <Textarea
                   id="description"
                   value={formData.description || ""}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  onChange={(e) => handleTextareaChange("description", e.target.value)}
                   placeholder="Product description"
                   rows={4}
                 />
+                <p className="text-xs text-gray-500">
+                  {countCharacters(formData.description || "")} / 50 characters
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="care">Care Instructions</Label>
                 <Textarea
                   id="care"
                   value={formData.care || ""}
-                  onChange={(e) => handleInputChange("care", e.target.value)}
+                  onChange={(e) => handleTextareaChange("care", e.target.value)}
                   placeholder="Care instructions"
                   rows={3}
                 />
+                <p className="text-xs text-gray-500">
+                  {countCharacters(formData.care || "")} / 50 characters
+                </p>
               </div>
             </div>
           </CardContent>
@@ -414,9 +432,9 @@ export function ProductUpdateModal({
         {/* Tags */}
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Tags</h3>
+            <h3 className="text-lg font-semibold mb-4">Meta Tags</h3>
             <div className="space-y-2">
-              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Label htmlFor="tags">(comma-separated)</Label>
               <Input
                 id="tags"
                 value={tagsInput}

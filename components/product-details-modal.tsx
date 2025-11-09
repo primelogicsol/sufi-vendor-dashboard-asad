@@ -1241,7 +1241,7 @@ export function ProductDetailsModal({ productId, category, trigger, onProductDel
                   className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/20 text-xs sm:text-sm"
                 >
                   <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                  Update
+                  Edit
                 </Button>
                 {!showDeleteConfirm ? (
                   <Button

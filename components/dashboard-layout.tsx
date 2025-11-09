@@ -27,7 +27,7 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
-    name: "Zone Rates",
+    name: "Shipping Zone Rates",
     href: "/zonerates",
     icon: Package,
   },
